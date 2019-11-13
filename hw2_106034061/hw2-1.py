@@ -2,7 +2,7 @@ import os
 import cv2
 import numpy as np
 import scipy.linalg
-#import visualize as vl
+import neat
 import matplotlib.pyplot as plt
 from matplotlib import cm
 from matplotlib.ticker import LinearLocator
@@ -11,15 +11,12 @@ from mpl_toolkits.mplot3d import Axes3D
 Points_2D = []
 rows = 9
 cols = 4
-num_points = rows * cols
-Points_3D = np.loadtxt("./data/Point3D.txt", dtype='i', delimiter=' ')
-
 Data_index = 1
 Data_number = 2
 index = 0
-# change input image path here
-img = cv2.imread('data/data_1.jpg')
-h, w, c = img.shape
+
+num_points = rows * cols
+Points_3D = np.loadtxt("./data/Point3D.txt", dtype='i', delimiter=' ')
 
 def Get_Points_2D(event, x, y, flags, param):
     global Points_2D, index
@@ -69,9 +66,9 @@ def Decompose_into_KRT(Projection_Matrix):
     T=T[..., None]
     R = D.dot(R)
     K /= K[-1, -1]
-    print("K") ;print(K)
-    print("R") ;print(R)
-    print("T") ;print(T)
+#    print("K") ;print(K)
+#    print("R") ;print(R)
+#    print("T") ;print(T)
     return K,R,T
 
 def Reproject_into_Points_2D(K, R, T, Points_3D):
@@ -85,6 +82,7 @@ def Reproject_into_Points_2D(K, R, T, Points_3D):
     Points_2D_3N = Points_2D_3N.transpose()
     Points_2D_3N[:, 0] = np.divide(Points_2D_3N[:, 0], Points_2D_3N[:, 2])
     Points_2D_3N[:, 1] = np.divide(Points_2D_3N[:, 1], Points_2D_3N[:, 2])
+    print("Points_2D_3N") ;print(Points_2D_3N)
     RMS=0
     for i in range(r):
         cv2.circle(img, (int(Points_2D[i][0]), int(Points_2D[i][1])), 5, (0, 255, 255), -1)
@@ -92,24 +90,28 @@ def Reproject_into_Points_2D(K, R, T, Points_3D):
         RMS+=(Points_2D[i][0]-Points_2D_3N[i][0])**2+(Points_2D[i][1]-Points_2D_3N[i][1])**2
     RMS /= r
     RMS=np.sqrt(RMS)
+    print("RMS") ;print(RMS)
     cv2.imshow('image', img)
     cv2.imwrite('./hw2-1/Result' + str(Data_index) + '.jpg', img)
     return Points_2D_3N[:, 0:2], RMS
 def Compute_Camera_Position(R, T):
     return R.transpose().dot(T)
+def Compute_Camera_Angle()
     
 if __name__ == '__main__':
-    for i in range(1, Data_number):
-        mouse = []
+    for i in range(1, Data_number+1):
         index = 0
         img_path = 'data/data_' + str(Data_index) +'.jpg'
+#        print("Image Path") ;print(img_path)
         img = cv2.imread(img_path)
         h, w, c = img.shape
         if os.path.isfile('./hw2-1/Points_2D_'+str(Data_index)+'.npy'):
+            print("Showing Image...")
             Points_2D = np.load('./hw2-1/Points_2D_'+str(Data_index)+'.npy')
             print("Points_2D") ;print(Points_2D)
             print("Points_3D") ;print(Points_3D)
         else:
+            print("You need to labelize it...")
             cv2.namedWindow('image', cv2.WINDOW_NORMAL)
             cv2.resizeWindow('image', w, h)
             cv2.setMouseCallback('image', Get_Points_2D)
@@ -122,10 +124,14 @@ if __name__ == '__main__':
         np.save('./hw2-1/K_matrix_'+str(Data_index), np.asarray(K))
         np.save('./hw2-1/R_matrix_'+str(Data_index), np.asarray(R))
         np.save('./hw2-1/T_matrix_'+str(Data_index), np.asarray(T))
+        cv2.namedWindow('image', cv2.WINDOW_NORMAL)
+        cv2.resizeWindow('image', w, h)
+        cv2.imshow('image', img)
+        Points_2D_3N, RMS = Reproject_into_Points_2D(K, R, T, Points_3D)
+        np.save('./hw2-1/RMS_'+str(Data_index), np.asarray(RMS))
+        Camera_Position = Compute_Camera_Position(R, T)
+        print("Camera Position") ;print(Camera_Position)
+        Data_index += 1
+        cv2.waitKey(0)
+    
 
-    cv2.namedWindow('image', cv2.WINDOW_NORMAL)
-    cv2.resizeWindow('image', w, h)
-    cv2.imshow('image', img)
-    Points_2D_3N, RMS = Reproject_into_Points_2D(K, R, T, Points_3D)
-    np.save('./hw2-1/RMS_'+str(Data_index), np.asarray(RMS))
-    cv2.waitKey(0)
