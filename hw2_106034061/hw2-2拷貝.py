@@ -22,7 +22,7 @@ def Get_Points_2D(event, x, y, flags, param):
     global Points_2D, index
     if event == cv2.EVENT_LBUTTONDOWN:
         Points_2D += [[x, y]]
-        np.save('hw2-1/Points_2D_'+str(Data_index), np.asarray(Points_2D))
+        np.save('hw2-2/Points_2D_'+str(Data_index), np.asarray(Points_2D))
     elif event == cv2.EVENT_LBUTTONUP:
         cv2.circle(img, (x, y), 5, (0, 255, 255), -1)
         cv2.imshow('image', img)
@@ -92,7 +92,7 @@ def Reproject_into_Points_2D(K, R, T, Points_3D):
     RMS=np.sqrt(RMS)
     print("RMS") ;print(RMS)
     cv2.imshow('image', img)
-    cv2.imwrite('./hw2-1/Result' + str(Data_index) + '.jpg', img)
+    cv2.imwrite('./hw2-2/Result' + str(Data_index) + '.jpg', img)
     return Points_2D_3N[:, 0:2], RMS
 def Compute_Camera_Position(R, T):
     return R.transpose().dot(T)
@@ -106,9 +106,9 @@ if __name__ == '__main__':
 #        print("Image Path") ;print(img_path)
         img = cv2.imread(img_path)
         h, w, c = img.shape
-        if os.path.isfile('./hw2-1/Points_2D_'+str(Data_index)+'.npy'):
+        if os.path.isfile('./hw2-2/Points_2D_'+str(Data_index)+'.npy'):
             print("Showing Image...")
-            Points_2D = np.load('./hw2-1/Points_2D_'+str(Data_index)+'.npy')
+            Points_2D = np.load('./hw2-2/Points_2D_'+str(Data_index)+'.npy')
             print("Points_2D") ;print(Points_2D)
             print("Points_3D") ;print(Points_3D)
         else:
@@ -118,18 +118,18 @@ if __name__ == '__main__':
             cv2.setMouseCallback('image', Get_Points_2D)
             cv2.imshow('image', img)
             cv2.waitKey(0)
-            np.save('hw2-1/Points_2D'+str(Data_index), np.asarray(Points_2D))
+            np.save('hw2-2/Points_2D'+str(Data_index), np.asarray(Points_2D))
         Projection_Matrix = Compute_Projection_Matrix()
-        np.save('./hw2-1/Projection_matrix_'+str(Data_index), np.asarray(Points_2D))
+        np.save('./hw2-2/Projection_matrix_'+str(Data_index), np.asarray(Points_2D))
         K, R, T = Decompose_into_KRT(Projection_Matrix)
-        np.save('./hw2-1/K_matrix_'+str(Data_index), np.asarray(K))
-        np.save('./hw2-1/R_matrix_'+str(Data_index), np.asarray(R))
-        np.save('./hw2-1/T_matrix_'+str(Data_index), np.asarray(T))
+        np.save('./hw2-2/K_matrix_'+str(Data_index), np.asarray(K))
+        np.save('./hw2-2/R_matrix_'+str(Data_index), np.asarray(R))
+        np.save('./hw2-2/T_matrix_'+str(Data_index), np.asarray(T))
         cv2.namedWindow('image', cv2.WINDOW_NORMAL)
         cv2.resizeWindow('image', w, h)
         cv2.imshow('image', img)
         Points_2D_3N, RMS = Reproject_into_Points_2D(K, R, T, Points_3D)
-        np.save('./hw2-1/RMS_'+str(Data_index), np.asarray(RMS))
+        np.save('./hw2-2/RMS_'+str(Data_index), np.asarray(RMS))
         Camera_Position = Compute_Camera_Position(R, T)
         print("Camera Position") ;print(Camera_Position)
         Data_index += 1
