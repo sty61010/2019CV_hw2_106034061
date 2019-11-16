@@ -2,7 +2,7 @@ import os
 import cv2
 import numpy as np
 import scipy.linalg
-import neat
+import visualize as vl
 import matplotlib.pyplot as plt
 from matplotlib import cm
 from matplotlib.ticker import LinearLocator
@@ -134,5 +134,12 @@ if __name__ == '__main__':
         print("Camera Position") ;print(Camera_Position)
         Data_index += 1
         cv2.waitKey(0)
+        
+    R1=np.load('./hw2-1/R_matrix_1.npy')
+    T1=np.load('./hw2-1/T_matrix_1.npy')
+    R2=np.load('./hw2-1/R_matrix_2.npy')
+    T2=np.load('./hw2-1/T_matrix_2.npy')
+    vl.visualize(Points_3D, R1, T1, R2, T2)
+
     
 
